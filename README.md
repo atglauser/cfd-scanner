@@ -4,7 +4,7 @@ A daily technical scan of about 60 non-equity CFD markets (FX, indices, energy, 
 
 **Live dashboard:** https://atglauser.github.io/cfd-scanner/
 
-On the dashboard you enter your own account size and risk per trade, and all sizes recompute in your browser.
+On the dashboard you enter your own account size and risk per trade, and all sizes recompute in your browser. The **How it works** tab (https://atglauser.github.io/cfd-scanner/#how) explains the indicators, the reasoning behind each rule, and the limitations.
 
 ## What it does
 1. Downloads daily (2 years) and hourly (180 days) prices from Yahoo Finance.
