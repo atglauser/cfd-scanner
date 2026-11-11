@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CFD Scanner</title>
+<meta name="description" content="Daily multi-asset CFD technical scan: trend, levels, risk-based sizing after spread and financing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f7f9; --fg: #14171c; --muted: #5d6673; --card: #ffffff; --line: #e3e6eb;
+  --accent: #2f5bd3; --long: #13804b; --short: #c2410c; --warn: #a16207; --bad: #b91c1c;
+  --chip: #eef1f5; --row-hover: #f2f5fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1216; --fg: #e7eaee; --muted: #949dab; --card: #171b21; --line: #262c35;
+    --accent: #7ea2ff; --long: #43c383; --short: #fb8a4c; --warn: #e3b341; --bad: #f87171;
+    --chip: #20262e; --row-hover: #1d232b;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1216; --fg: #e7eaee; --muted: #949dab; --card: #171b21; --line: #262c35;
+  --accent: #7ea2ff; --long: #43c383; --short: #fb8a4c; --warn: #e3b341; --bad: #f87171;
+  --chip: #20262e; --row-hover: #1d232b;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 Inter, system-ui, sans-serif; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 24px 16px 48px; }
+h1 { font-size: 26px; margin: 0; letter-spacing: -0.02em; }
+h2 { font-size: 17px; margin: 0 0 4px; }
+.sub { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; }
+.status { font-size: 13px; color: var(--muted); }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--chip); color: var(--muted); white-space: nowrap; }
+.badge.ok { color: var(--long); } .badge.warn { color: var(--warn); } .badge.bad { color: var(--bad); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; }
+label.f { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 500; }
+input[type=number] { width: 120px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); font: 500 14px "JetBrains Mono", monospace; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--chip); color: var(--fg); border-radius: 999px; padding: 5px 12px; font: 500 13px Inter, sans-serif; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.kpi { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.kpi .v { font: 600 22px "JetBrains Mono", monospace; letter-spacing: -0.02em; }
+.kpi .l { font-size: 12px; color: var(--muted); }
+.kpi.warn .v { color: var(--warn); } .kpi.bad .v { color: var(--bad); }
+.alerts { margin: 0; padding-left: 18px; font-size: 14px; }
+.alerts li { margin: 2px 0; }
+.tw { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th { text-align: left; font-weight: 600; color: var(--muted); font-size: 12px; padding: 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td.n, th.n { text-align: right; font-family: "JetBrains Mono", monospace; }
+tbody tr.row { cursor: pointer; }
+tbody tr.row:hover { background: var(--row-hover); }
+tr.det td { white-space: normal; background: var(--row-hover); color: var(--muted); font-size: 13px; }
+.long { color: var(--long); font-weight: 600; } .short { color: var(--short); font-weight: 600; }
+.tf { font-family: "JetBrains Mono", monospace; font-size: 12px; }
+.flag { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 4px; font-size: 11px; font-weight: 600; background: var(--chip); color: var(--warn); }
+.flag.bad { color: var(--bad); }
+.score { font-weight: 600; }
+.empty { color: var(--muted); font-size: 14px; padding: 8px 0; }
+.method { font-size: 14px; }
+.method ul { padding-left: 18px; margin: 6px 0; }
+.method li { margin: 3px 0; }
+details summary { cursor: pointer; font-weight: 600; }
+footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
+a { color: var(--accent); }
+.theme-btn { background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 8px; padding: 4px 10px; font: 500 12px Inter, sans-serif; cursor: pointer; }
+@media (max-width: 600px) { h1 { font-size: 22px; } .kpi .v { font-size: 18px; } }
+@media print { .controls, .theme-btn { display: none; } .card { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>CFD Scanner</h1>
+      <div class="status" id="status">Loading scan…</div>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button">Theme</button>
+  </header>
+
+  <noscript><div class="card">This dashboard needs JavaScript to compute position sizes. The raw scan is in <a href="data/latest.json">data/latest.json</a>.</div></noscript>
+
+  <section class="card">
+    <div class="controls">
+      <label class="f">Account (CHF)<input type="number" id="acct" min="1" step="50" value="1000"></label>
+      <label class="f">Risk per trade (%)<input type="number" id="risk" min="0.1" max="10" step="0.1" value="2"></label>
+      <label class="f">Max total open risk (%)<input type="number" id="maxOpen" min="0.5" max="50" step="0.5" value="4"></label>
+      <div class="f" style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:500">Markets<div class="chips" id="groups"></div></div>
+    </div>
+    <p class="sub" style="margin:10px 0 0">Sizes recompute in your browser. Nothing you type is sent anywhere.</p>
+  </section>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section class="card" id="alertsCard" hidden>
+    <h2>Before you place anything</h2>
+    <ul class="alerts" id="alerts"></ul>
+  </section>
+
+  <section class="card">
+    <h2>Ranked setups</h2>
+    <p class="sub">Tradable at your size. Click a row for levels and notes. Score = trend strength × net R:R (capped at 4), reduced for far entries, RSI extremes, net R:R &lt; 1.5, high fees and high margin.</p>
+    <div class="tw"><table id="tTrades"></table></div>
+  </section>
+
+  <section class="card">
+    <h2>Not tradable at your risk</h2>
+    <p class="sub">The broker minimum size alone would risk more than your budget per trade.</p>
+    <div class="tw"><table id="tBlocked"></table></div>
+  </section>
+
+  <section class="card">
+    <h2>No trend (range)</h2>
+    <p class="sub">Timeframes disagree. No trend trade; range edges only.</p>
+    <div class="tw"><table id="tRange"></table></div>
+  </section>
+
+  <section class="card method">
+    <details>
+      <summary>Method and constraints</summary>
+      <ul>
+        <li><b>Data:</b> Yahoo Finance futures, index, spot and FX quotes, scanned once a day on weekdays. These are not a broker CFD feed: CFD prices can be offset from them (oil especially), so align levels with your own ticket before placing an order.</li>
+        <li><b>Trend:</b> EMA 20/50/200 stack on 1D, 4H and 1H, weighted 2 / 1.5 / 1. Bias LONG or SHORT needs a weighted score of at least 0.5.</li>
+        <li><b>Setup:</b> limit entry at the 4H EMA20 (averaged with a nearby swing level when they agree), stop 1 × ATR(4H) beyond entry or beyond the next swing level, target at the next opposite 4H swing level.</li>
+        <li><b>Sizing:</b> risk = (stop distance + spread) × units + financing for the expected holding days. Units round down to the broker step. If the minimum size alone exceeds the budget, the setup is not tradable.</li>
+        <li><b>Constraints:</b> max risk per trade (default 2%); max total open risk across the top setups (default 4%); same-currency FX positions count as one trade; skip setups whose spread + financing exceed <span id="mFee">10</span>% of the reward; prefer net R:R ≥ 1.5; flag any position whose margin exceeds <span id="mMargin">50</span>% of the account.</li>
+        <li><b>Contract specs</b> (spread, minimum size, step, margin, financing) are generic estimates for a retail CFD broker. Check yours: they change which setups are tradable.</li>
+        <li><b>Not checked:</b> the economic calendar (central banks, CPI, inventories), weekend gaps, liquidity.</li>
+      </ul>
+    </details>
+  </section>
+
+  <footer>
+    Educational and decision-support tool. Not investment advice and not a recommendation to buy or sell any instrument. CFDs are leveraged products and most retail accounts lose money trading them.
+    Raw data: <a href="data/latest.json">latest.json</a>.
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  };
+
+  // theme toggle
+  var root = document.documentElement;
+  var savedTheme = store.get("cfd-theme");
+  if (savedTheme) root.setAttribute("data-theme", savedTheme);
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    var dark = root.getAttribute("data-theme") === "dark" ||
+      (!root.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+    var t = dark ? "light" : "dark";
+    root.setAttribute("data-theme", t); store.set("cfd-theme", t);
+  });
+
+  var GROUPS = ["all", "fx", "indices", "energy", "metals", "crypto", "bonds"];
+  var state = { group: store.get("cfd-group") || "all", open: {} };
+  var inputs = { acct: el("acct"), risk: el("risk"), maxOpen: el("maxOpen") };
+  ["acct", "risk", "maxOpen"].forEach(function (k) {
+    var v = store.get("cfd-" + k); if (v) inputs[k].value = v;
+    inputs[k].addEventListener("input", function () { store.set("cfd-" + k, inputs[k].value); render(); });
+  });
+
+  var DATA = null;
+
+  function el(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function num(x) { return typeof x === "number" && isFinite(x); }
+  function fmt(x, ref) {
+    if (!num(x)) return "-";
+    var r = Math.abs(num(ref) && ref ? ref : x);
+    var d = r >= 1000 ? 1 : r >= 100 ? 2 : r >= 10 ? 3 : r >= 1 ? 4 : 5;
+    return x.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+  function f2(x) { return num(x) ? x.toFixed(2) : "-"; }
+  function f0(x) { return num(x) ? Math.round(x).toLocaleString("en-US") : "-"; }
+  function units(u) {
+    if (!num(u)) return "-";
+    return (u >= 1 && Math.abs(u - Math.round(u)) < 1e-9) ? Math.round(u).toLocaleString("en-US") : String(+u.toPrecision(6));
+  }
+  function arrow(t) { return t === 1 ? "UP" : t === -1 ? "DN" : "--"; }
+
+  // ---- re-size one setup for the viewer's account (mirrors cfd_scanner.py) ----
+  function size(r, account, riskPct, meta) {
+    var risk = Math.abs(r.entry - r.stop), reward = Math.abs(r.target - r.entry);
+    var fx = r.fx_chf, hold = meta.hold_days;
+    var budget = account * riskPct / 100;
+    var finUnit = r.entry * fx * r.fin_pct / 100 / 365 * hold;
+    var perUnit = (risk + r.spread) * fx;
+    var u = Math.floor(budget / (perUnit + finUnit) / r.step_units + 1e-9) * r.step_units;
+    var tradable = true, notes = [];
+    if (u < r.min_units) {
+      u = r.min_units; tradable = false;
+      notes.push("min size " + units(r.min_units) + " risks " + f2(r.min_units * (perUnit + finUnit)) + " CHF > budget " + f2(budget));
+    }
+    u = Math.round(u * 1e8) / 1e8;
+    var notional = u * r.entry * fx, margin = notional * r.margin_pct / 100;
+    var financing = notional * r.fin_pct / 100 / 365 * hold;
+    var gross = u * reward * fx, fees = u * r.spread * fx + financing;
+    var riskChf = u * perUnit + financing, rewardChf = gross - fees;
+    var rrNet = riskChf > 0 ? rewardChf / riskChf : NaN;
+    var feePct = gross > 0 ? fees / gross * 100 : NaN;
+    var s = Math.abs(r.strength) * Math.min(Math.max(rrNet, 0), 4) * r.entry_factor * (1 - 0.6 * r.rsi_pen);
+    var flags = [];
+    if (rrNet < meta.rr_min) { s *= 0.5; flags.push(["R:R<" + meta.rr_min, false]); }
+    if (feePct > meta.max_fee_pct) { s *= 0.5; flags.push(["fees " + Math.round(feePct) + "%", true]); notes.push("fees " + Math.round(feePct) + "% of reward (> " + meta.max_fee_pct + "%)"); }
+    if (margin > account * meta.max_margin_pct / 100) { s *= 0.5; flags.push(["margin", true]); notes.push("margin " + f0(margin) + " CHF > " + meta.max_margin_pct + "% of account"); }
+    if (r.entry_factor < 1) flags.push(["far entry", false]);
+    if (r.rsi_pen > 0) flags.push([r.bias === "SHORT" ? "oversold" : "overbought", r.rsi_pen >= 0.5]);
+    if (!tradable) s = 0;
+    return { units: u, notional: notional, margin: margin, riskChf: riskChf, rewardChf: rewardChf,
+             rrNet: rrNet, feePct: feePct, score: Math.round(s * 100) / 100, tradable: tradable,
+             notes: notes, flags: flags };
+  }
+
+  function fxExposure(rows) {
+    var exp = {};
+    rows.forEach(function (x) {
+      if (x.r.group !== "fx") return;
+      var sign = x.r.bias === "LONG" ? 1 : -1;
+      [[x.r.name.slice(0, 3), sign], [x.r.name.slice(3), -sign]].forEach(function (p) {
+        var k = p[0] + (p[1] > 0 ? " long" : " short");
+        (exp[k] = exp[k] || []).push(x.r.name);
+      });
+    });
+    return Object.keys(exp).filter(function (k) { return exp[k].length > 1; })
+      .map(function (k) { return [k, exp[k]]; });
+  }
+
+  function chips() {
+    var box = el("groups"); box.innerHTML = "";
+    GROUPS.forEach(function (g) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.textContent = g === "all" ? "All" : g;
+      b.setAttribute("aria-pressed", String(state.group === g));
+      b.addEventListener("click", function () { state.group = g; store.set("cfd-group", g); chips(); render(); });
+      box.appendChild(b);
+    });
+  }
+
+  function statusLine(meta) {
+    var t = new Date(meta.generated_utc), hrs = (Date.now() - t.getTime()) / 36e5;
+    var cls = hrs < 30 ? "ok" : hrs < 80 ? "warn" : "bad";
+    var age = hrs < 1 ? "under 1 h ago" : hrs < 48 ? Math.round(hrs) + " h ago" : Math.round(hrs / 24) + " days ago";
+    var okCls = meta.ok === meta.instruments ? "ok" : meta.ok >= 0.8 * meta.instruments ? "warn" : "bad";
+    el("status").innerHTML = "Scan " + esc(t.toISOString().slice(0, 16).replace("T", " ")) + " UTC " +
+      '<span class="badge ' + cls + '">' + esc(age) + "</span> " +
+      '<span class="badge ' + okCls + '">' + meta.ok + "/" + meta.instruments + " markets</span>";
+  }
+
+  function render() {
+    if (!DATA) return;
+    var meta = DATA.meta;
+    var account = parseFloat(inputs.acct.value), riskPct = parseFloat(inputs.risk.value), maxOpen = parseFloat(inputs.maxOpen.value);
+    if (!(account > 0) || !(riskPct > 0)) return;
+    el("mFee").textContent = meta.max_fee_pct; el("mMargin").textContent = meta.max_margin_pct;
+
+    var inGroup = function (r) { return state.group === "all" || r.group === state.group; };
+    var ok = DATA.results.filter(function (r) { return !r.error; });
+    var setups = ok.filter(function (r) { return /^trend/.test(r.setup) && num(r.fx_chf) && num(r.entry); })
+      .map(function (r) { return { r: r, s: size(r, account, riskPct, meta) }; });
+    var trades = setups.filter(function (x) { return x.s.tradable; }).sort(function (a, b) { return b.s.score - a.s.score; });
+    var blocked = setups.filter(function (x) { return !x.s.tradable; });
+    var ranging = ok.filter(function (r) { return !/^trend/.test(r.setup); });
+
+    // KPIs + alerts use the whole universe's top N, not the filter
+    var top = trades.slice(0, meta.top_n);
+    var topRisk = top.reduce(function (a, x) { return a + x.s.riskChf; }, 0);
+    var topMargin = top.reduce(function (a, x) { return a + x.s.margin; }, 0);
+    var topRiskPct = topRisk / account * 100;
+    var maxN = Math.max(1, Math.floor(maxOpen / riskPct + 1e-9));
+    el("kpis").innerHTML = [
+      ["Risk per trade", f2(account * riskPct / 100) + " CHF", ""],
+      ["Tradable setups", trades.length + " / " + setups.length, ""],
+      ["If top " + top.length + " fill: risk", topRiskPct.toFixed(1) + "%", topRiskPct > maxOpen ? "bad" : ""],
+      ["If top " + top.length + " fill: margin", f0(topMargin) + " CHF", topMargin > account * 0.5 ? "warn" : ""],
+      ["Max positions at your cap", String(maxN), ""]
+    ].map(function (k) { return '<div class="kpi ' + k[2] + '"><div class="v">' + esc(k[1]) + '</div><div class="l">' + esc(k[0]) + "</div></div>"; }).join("");
+
+    var alerts = [];
+    if (topRiskPct > maxOpen) alerts.push("If the top " + top.length + " setups all fill, total risk is " + topRiskPct.toFixed(1) + "% of the account, above your " + maxOpen + "% cap. Take at most " + maxN + ".");
+    fxExposure(top).forEach(function (p) { alerts.push(p[0] + " appears in " + p[1].join(", ") + ": correlated, treat as one trade."); });
+    if (meta.broker_aligned && meta.broker_aligned.length) alerts.push("Levels shifted to a broker price for: " + meta.broker_aligned.join(", ") + ".");
+    alerts.push("Yahoo prices are not CFD prices. Re-check entry, stop and target on your own chart before placing an order.");
+    el("alerts").innerHTML = alerts.map(function (a) { return "<li>" + esc(a) + "</li>"; }).join("");
+    el("alertsCard").hidden = false;
+
+    // ranked table
+    var tr = trades.filter(function (x) { return inGroup(x.r); });
+    var h = "<thead><tr><th>#</th><th>Market</th><th>Bias</th><th>1D/4H/1H</th><th class=n>RSI 1D/4H</th><th>Order</th>" +
+      "<th class=n>Entry</th><th class=n>Stop</th><th class=n>Target</th><th class=n>R:R net</th><th class=n>Units</th>" +
+      "<th class=n>Risk CHF</th><th class=n>Reward CHF</th><th class=n>Fees</th><th class=n>Margin CHF</th><th class=n>Score</th><th>Flags</th></tr></thead><tbody>";
+    if (!tr.length) h += '<tr><td colspan="17" class="empty">No tradable setups in this group.</td></tr>';
+    tr.forEach(function (x) {
+      var r = x.r, s = x.s, p = r.price, rank = trades.indexOf(x) + 1;
+      h += '<tr class="row" data-k="' + esc(r.name) + '"><td>' + rank + "</td><td><b>" + esc(r.name) + "</b></td>" +
+        '<td class="' + (r.bias === "LONG" ? "long" : "short") + '">' + r.bias + "</td>" +
+        '<td class="tf">' + arrow(r.trend_1d) + "/" + arrow(r.trend_4h) + "/" + arrow(r.trend_1h) + "</td>" +
+        "<td class=n>" + Math.round(r.rsi_1d) + "/" + Math.round(r.rsi_4h) + "</td><td>" + esc(r.order) + "</td>" +
+        "<td class=n>" + fmt(r.entry, p) + "</td><td class=n>" + fmt(r.stop, p) + "</td><td class=n>" + fmt(r.target, p) + "</td>" +
+        "<td class=n>" + (num(s.rrNet) ? s.rrNet.toFixed(1) : "-") + "</td><td class=n>" + units(s.units) + " " + esc(r.unit) + "</td>" +
+        "<td class=n>" + f2(s.riskChf) + "</td><td class=n>" + f2(s.rewardChf) + "</td><td class=n>" + (num(s.feePct) ? Math.round(s.feePct) + "%" : "-") + "</td>" +
+        "<td class=n>" + f0(s.margin) + '</td><td class="n score">' + s.score.toFixed(2) + "</td><td>" +
+        s.flags.map(function (f) { return '<span class="flag' + (f[1] ? " bad" : "") + '">' + esc(f[0]) + "</span>"; }).join("") + "</td></tr>";
+      if (state.open[r.name]) {
+        var notes = (r.notes || []).concat(s.notes);
+        h += '<tr class="det"><td colspan="17">' + esc(r.ticker) + " · price " + fmt(p) + " · ATR(4H) " + fmt(r.atr_4h, p) +
+          " · daily ATR " + (num(r.atr_1d_pct) ? r.atr_1d_pct.toFixed(1) + "%" : "-") +
+          " · support " + fmt(r.support, p) + " / resistance " + fmt(r.resistance, p) +
+          " · entry " + (num(r.entry_dist_atr) ? r.entry_dist_atr.toFixed(1) : "-") + " ATR away · spread " + fmt(r.spread, p) +
+          " · notional " + f0(s.notional) + " CHF" + (notes.length ? "<br>" + esc(notes.join("; ")) : "") + "</td></tr>";
+      }
+    });
+    el("tTrades").innerHTML = h + "</tbody>";
+    Array.prototype.forEach.call(el("tTrades").querySelectorAll("tr.row"), function (row) {
+      row.addEventListener("click", function () { var k = row.getAttribute("data-k"); state.open[k] = !state.open[k]; render(); });
+    });
+
+    // blocked
+    var bl = blocked.filter(function (x) { return inGroup(x.r); }).sort(function (a, b) { return a.s.riskChf - b.s.riskChf; });
+    var hb = "<thead><tr><th>Market</th><th>Bias</th><th class=n>Entry</th><th class=n>Stop</th><th class=n>Min size</th><th class=n>Risk at min CHF</th><th class=n>% of account</th></tr></thead><tbody>";
+    if (!bl.length) hb += '<tr><td colspan="7" class="empty">None in this group.</td></tr>';
+    bl.forEach(function (x) {
+      var r = x.r, p = r.price;
+      hb += "<tr><td><b>" + esc(r.name) + '</b></td><td class="' + (r.bias === "LONG" ? "long" : "short") + '">' + r.bias + "</td>" +
+        "<td class=n>" + fmt(r.entry, p) + "</td><td class=n>" + fmt(r.stop, p) + "</td><td class=n>" + units(r.min_units) + " " + esc(r.unit) + "</td>" +
+        "<td class=n>" + f2(x.s.riskChf) + "</td><td class=n>" + (x.s.riskChf / account * 100).toFixed(1) + "%</td></tr>";
+    });
+    el("tBlocked").innerHTML = hb + "</tbody>";
+
+    // range
+    var rg = ranging.filter(inGroup).sort(function (a, b) { return a.name < b.name ? -1 : 1; });
+    var hr = "<thead><tr><th>Market</th><th>1D/4H/1H</th><th class=n>RSI 1D</th><th class=n>Support</th><th class=n>Resistance</th><th class=n>Price</th></tr></thead><tbody>";
+    if (!rg.length) hr += '<tr><td colspan="6" class="empty">None in this group.</td></tr>';
+    rg.forEach(function (r) {
+      var p = r.price;
+      hr += "<tr><td><b>" + esc(r.name) + '</b></td><td class="tf">' + arrow(r.trend_1d) + "/" + arrow(r.trend_4h) + "/" + arrow(r.trend_1h) + "</td>" +
+        "<td class=n>" + (num(r.rsi_1d) ? Math.round(r.rsi_1d) : "-") + "</td><td class=n>" + fmt(r.support, p) + "</td><td class=n>" + fmt(r.resistance, p) + "</td><td class=n>" + fmt(p) + "</td></tr>";
+    });
+    el("tRange").innerHTML = hr + "</tbody>";
+  }
+
+  chips();
+  fetch("data/latest.json", { cache: "no-store" })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (d) { DATA = d; statusLine(d.meta); render(); })
+    .catch(function () { el("status").innerHTML = '<span class="badge bad">No scan data yet</span> The first scheduled run has not published data.'; });
+})();
+</script>
+</body>
+</html>
