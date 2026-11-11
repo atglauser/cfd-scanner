@@ -113,6 +113,7 @@ a { color: var(--accent); }
 
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" id="tabBtn-scan" aria-controls="tab-scan" aria-selected="true" type="button">Scan</button>
+    <button class="tab" role="tab" id="tabBtn-use" aria-controls="tab-use" aria-selected="false" type="button">How to use</button>
     <button class="tab" role="tab" id="tabBtn-how" aria-controls="tab-how" aria-selected="false" type="button">How it works</button>
   </nav>
 
@@ -154,7 +155,71 @@ a { color: var(--accent); }
     <div class="tw"><table id="tRange"></table></div>
   </section>
 
-  <p class="sub">New here? Read <a href="#how" data-goto="how">How it works</a> first.</p>
+  <p class="sub">New here? Read <a href="#use">How to use</a> and <a href="#how">How it works</a> first.</p>
+  </div>
+
+  <div id="tab-use" class="how" role="tabpanel" aria-labelledby="tabBtn-use">
+    <section class="card">
+      <h2>Use it as a shortlist, not a decision</h2>
+      <p>The scan narrows about 60 markets down to a few worth opening on your own chart. Most costly mistakes happen after that step, when the order is placed. This page is the routine and the guard rails.</p>
+      <p class="toc">Jump to: <a href="#u-routine">Daily routine</a> <a href="#u-mistakes">Costly mistakes</a> <a href="#u-expect">What to expect</a> <a href="#u-rules">Hard rules</a></p>
+    </section>
+
+    <section class="card" id="u-routine">
+      <h2>Daily routine (about 15 minutes)</h2>
+      <table>
+        <thead><tr><th>#</th><th>Do</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Set <b>your</b> account size, risk per trade and max total open risk at the top of the Scan tab. They are remembered in this browser.</td><td>The defaults (1,000 CHF, 2%, 4%) are examples. Every size on the page follows these three numbers.</td></tr>
+          <tr><td>2</td><td>Check the status badges: a green age and (nearly) all markets downloaded.</td><td>An old or partial scan means stale levels.</td></tr>
+          <tr><td>3</td><td>Read the <i>Before you place anything</i> box first.</td><td>It tells you how many positions your cap allows and which setups are really the same bet.</td></tr>
+          <tr><td>4</td><td>Pick <b>at most</b> the number of positions your cap allows (2 at 2% / 4%), from different currencies or themes.</td><td>Correlated positions lose together.</td></tr>
+          <tr><td>5</td><td>Open each one on your broker's chart and <b>rebuild entry, stop and target at the broker's prices</b>.</td><td>Yahoo quotes are not CFD prices. Some CFDs, oil especially, trade at a fixed offset.</td></tr>
+          <tr><td>6</td><td>Check the economic calendar for the next 48 hours.</td><td>The scan ignores news. A rate decision or CPI print can jump through a stop.</td></tr>
+          <tr><td>7</td><td>Recompute the size on the order ticket with the broker's real spread, minimum size and contract size.</td><td>The page's contract specs are estimates.</td></tr>
+          <tr><td>8</td><td>Place a limit order with stop and target attached, then leave it alone.</td><td>A written plan, executed mechanically, removes improvisation.</td></tr>
+        </tbody>
+      </table>
+      <p class="why"><b>Size formula:</b> units = risk budget ÷ ((stop distance + spread) × price of 1 quote-currency unit in your account currency). Always round <b>down</b>.</p>
+    </section>
+
+    <section class="card" id="u-mistakes">
+      <h2>Costly mistakes to avoid</h2>
+      <table>
+        <thead><tr><th>Mistake</th><th>How it happens</th><th>Guard</th></tr></thead>
+        <tbody>
+          <tr><td><b>Oversizing</b></td><td>Picking a round number of units instead of computing them. Ten units where four fit can double or triple the planned loss.</td><td>Compute the size from the stop every time. Never size from "what feels right" or from margin available.</td></tr>
+          <tr><td><b>Copying levels blindly</b></td><td>Entering at Yahoo prices on a CFD that trades at an offset.</td><td>Shift every level to your broker's price before placing the order.</td></tr>
+          <tr><td><b>Stacking correlated trades</b></td><td>Long USDCHF, long GBPCHF and short CHFJPY look like three trades but are one bet against the franc.</td><td>Follow the correlation warning: take one.</td></tr>
+          <tr><td><b>Chasing</b></td><td>The limit order did not fill, so you enter at market.</td><td>No fill, no trade. The setup only exists at its entry price.</td></tr>
+          <tr><td><b>Moving the stop</b></td><td>Widening it as price approaches.</td><td>Never widen. Tighten or close early if the picture changes.</td></tr>
+          <tr><td><b>Trading stale setups</b></td><td>Acting on yesterday's levels.</td><td>Re-read the scan daily and cancel pending orders whose setup has disappeared.</td></tr>
+          <tr><td><b>Ignoring costs</b></td><td>Exotic FX and crypto: a wide spread on a tight stop can eat a third of the reward.</td><td>Skip anything with a red <i>fees</i> flag.</td></tr>
+          <tr><td><b>Holding through the weekend</b></td><td>Prices can gap past the stop on Monday, and financing accrues every night.</td><td>Close or reduce before Friday's close unless the plan says otherwise.</td></tr>
+          <tr><td><b>Forcing a small account into big contracts</b></td><td>Index CFDs at minimum size can risk many times the budget.</td><td>Only trade setups from the ranked table, never from <i>Not tradable at your risk</i>.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card" id="u-expect">
+      <h2>What to expect</h2>
+      <ul>
+        <li><b>The ranking is unproven.</b> It has not been backtested. Start with paper trading or minimum size for 4 to 8 weeks and keep a journal: setup, filled or not, result, and whether you followed the plan.</li>
+        <li><b>Small accounts are mostly costs.</b> With a small risk budget, spreads and minimum sizes rule out many markets. That is not a bug; it is what the arithmetic says.</li>
+        <li><b>Losing streaks are normal.</b> Even at a 2:1 reward-to-risk, 5 to 8 losses in a row happen. At 2% per trade that is a 10 to 16% drawdown. At double the size it is a third of the account.</li>
+        <li><b>Fewer trades is usually better.</b> Some days nothing survives the chart check. Doing nothing is a valid outcome.</li>
+      </ul>
+    </section>
+
+    <section class="card" id="u-rules">
+      <h2>Hard rules</h2>
+      <ul>
+        <li>Never risk more than your per-trade budget, and never exceed your total open-risk cap.</li>
+        <li>Every order has a stop when it is placed, not later.</li>
+        <li>Set a drawdown limit in advance (for example −20% of the starting account). When it is hit, stop trading and review the journal before continuing.</li>
+      </ul>
+      <p class="why">Not investment advice. CFDs are leveraged products and most retail accounts lose money trading them.</p>
+    </section>
   </div>
 
   <div id="tab-how" class="how" role="tabpanel" aria-labelledby="tabBtn-how">
@@ -515,9 +580,10 @@ a { color: var(--accent); }
     el("tRange").innerHTML = hr + "</tbody>";
   }
 
-  // tabs: #how (or any #h-… anchor) opens the explanation tab
+  // tabs: #use / #u-… opens "How to use", #how / #h-… opens "How it works"
+  var TABS = ["scan", "use", "how"];
   function showTab(name, scroll) {
-    ["scan", "how"].forEach(function (t) {
+    TABS.forEach(function (t) {
       el("tab-" + t).hidden = t !== name;
       el("tabBtn-" + t).setAttribute("aria-selected", String(t === name));
     });
@@ -525,15 +591,16 @@ a { color: var(--accent); }
   }
   function fromHash() {
     var h = location.hash.slice(1);
-    var how = h === "how" || h.indexOf("h-") === 0;
-    showTab(how ? "how" : "scan", false);
-    if (h.indexOf("h-") === 0 && el(h)) el(h).scrollIntoView();
+    var tab = (h === "how" || h.indexOf("h-") === 0) ? "how"
+            : (h === "use" || h.indexOf("u-") === 0) ? "use" : "scan";
+    showTab(tab, false);
+    if (/^[hu]-/.test(h) && el(h)) el(h).scrollIntoView();
   }
-  el("tabBtn-scan").addEventListener("click", function () {
-    history.replaceState(null, "", location.pathname + location.search); showTab("scan", true);
-  });
-  el("tabBtn-how").addEventListener("click", function () {
-    history.replaceState(null, "", "#how"); showTab("how", true);
+  TABS.forEach(function (t) {
+    el("tabBtn-" + t).addEventListener("click", function () {
+      history.replaceState(null, "", t === "scan" ? location.pathname + location.search : "#" + t);
+      showTab(t, true);
+    });
   });
   window.addEventListener("hashchange", fromHash);
   fromHash();
